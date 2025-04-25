@@ -1,0 +1,6 @@
+# Config files
+/configs/*.yaml
+!/configs/*.template
+
+# Environment files
+.env
