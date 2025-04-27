@@ -4,3 +4,6 @@
 
 # Environment files
 .env
+
+# Temp files
+/tmp
