@@ -5,7 +5,6 @@ import (
    "sync"
 
    "github.com/sirupsen/logrus"
-   "github.com/joho/godotenv"
 )
 
 var (
@@ -14,13 +13,8 @@ var (
    once   sync.Once
 )
 
-func Initialize() {
+func init() {
    once.Do(func() {
-      err := godotenv.Load()
-      if err != nil {
-         logrus.Warn("Error loading .env file")
-      }
-
       appEnv := os.Getenv("APP_ENV")
 
       Logger = logrus.New()
@@ -41,8 +35,10 @@ func getLogLevel(env string) logrus.Level {
    switch env {
    case "production":
       return logrus.WarnLevel
-   case "dev":
+   case "development":
       return logrus.DebugLevel
+   case "test":
+      return logrus.InfoLevel
    default:
       logrus.Warn("Unrecognized APP_ENV, defaulting to DebugLevel")
       return logrus.DebugLevel
