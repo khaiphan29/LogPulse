@@ -1,0 +1,16 @@
+0
+14
+logs 0 5
+logs-dlq-permanent 1 0
+logs-dlq-permanent 0 0
+logs-dlq 2 0
+logs-dlq 1 0
+logs-dlq 0 0
+logs-dlq-permanent 2 0
+__consumer_offsets 0 3
+__consumer_offsets 3 5
+logs 2 0
+__consumer_offsets 4 0
+logs 1 5
+__consumer_offsets 1 4
+__consumer_offsets 2 12

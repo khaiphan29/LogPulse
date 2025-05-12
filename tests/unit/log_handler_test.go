@@ -1,4 +1,4 @@
-package log_handlers_test
+package loghandlertests
 
 import (
 	"bytes"
@@ -12,18 +12,18 @@ import (
 
    "github.com/khaiphan29/logpulse/internal/api/router"
 	"github.com/khaiphan29/logpulse/internal/api/parsing"
+   "github.com/khaiphan29/logpulse/tests/helpers"
 	"github.com/stretchr/testify/assert"
 )
 
 var testRouter *gin.Engine
 
 func init() {
-   // Set Gin to test mode
-   gin.SetMode(gin.TestMode)
+   // Set up Mock Handler
+   logHandler := helpers.NewMockHandler()
 
    // Initialize the router
-   testRouter = gin.New()
-   router.SetupRouter(testRouter)
+   testRouter = router.NewRouter("test", logHandler)
 }
 
 func TestGetLogHandler(t *testing.T) {
@@ -84,7 +84,7 @@ var postTestCases = []struct {
          LogLevel:    "INFO",
          Message:     "This is a test log message.",
          Metadata:    map[string]interface{}{"key1": "value1"},
-         Source:      "unit-test",
+         Source:      "auth-service",
          Environment: "test",
          Type:        "application",
       },
@@ -101,15 +101,21 @@ var postTestCases = []struct {
    },
    {
       name:           "Invalid Timestamp",
-      payload:        `{"logId":"12345","timestamp":"invalid-timestamp","logLevel":"INFO","message":"Test message","source":"unit-test","type":"application"}`,
+      payload:        `{"logId":"12345","timestamp":"invalid-timestamp","logLevel":"INFO","message":"Test message","source":"auth-service","type":"application"}`,
       expectedStatus: http.StatusBadRequest,
       expectedBody:   `{"error":"Invalid JSON"}`, // Default Gin error for invalid data binding
    },
    {
       name:           "Invalid LogLevel",
-      payload:        `{"logId":"12345","timestamp":"2025-04-27T11:00:00Z","logLevel":"INVALID","message":"Test message","source":"unit-test","type":"application"}`,
+      payload:        `{"logId":"12345","timestamp":"2025-04-27T11:00:00Z","logLevel":"INVALID","message":"Test message","source":"auth-service","type":"application"}`,
       expectedStatus: http.StatusBadRequest,
       expectedBody:   `{"error":"Invalid log level"}`,
+   },
+   {
+      name:           "Invalid Source",
+      payload:        `{"logId":"12345","timestamp":"2025-04-27T11:00:00Z","logLevel":"INFO","message":"Test message","source":"invalid-source","type":"application"}`,
+      expectedStatus: http.StatusBadRequest,
+      expectedBody:   `{"error":"Invalid source"}`,
    },
    {
       name:           "Malformed JSON",

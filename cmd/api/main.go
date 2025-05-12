@@ -1,32 +1,73 @@
 package main
 
 import (
-   "os"
+	"os"
 
-   "github.com/khaiphan29/logpulse/internal/api/router"
-   "github.com/khaiphan29/logpulse/pkg/logger"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
+	"github.com/khaiphan29/logpulse/internal/constants"
+	"github.com/khaiphan29/logpulse/internal/setup"
+   "github.com/khaiphan29/logpulse/internal/processor"
 )
 
 func main() {
-   // Initialize the logger
-   logger.Initialize()
-
-   // Create a new Gin router
-   router := router.SetupRouter()
-
    // Start the server
-   port := ":8080"
+   port := constants.HTTPServerPort
    if (len(os.Args) > 1) {
       port = ":" + os.Args[1]
    }
 
-   if err := router.Run(port); err != nil {
-      logger.Fatal("Failed to start server", map[string]any{
-         "error": err,
-      })
-   } else {
-      logger.Info("Server started on port 8080", map[string]any{
-         "port": 8080,
-      })
+   // Initialize Processors
+   logProcessor := &processor.LogProcessor{}
+   logDLQProcessor := &processor.LogDLQProcessor{}
+   logDLQPermanentProcessor := &processor.LogDLQPermanentProcessor{}
+
+   cfg := setup.ServiceConfig{
+      Port: port,
+      KafkaBrokers: constants.KafkaBrokers,
+      ProducerConfig: &kafka.ConfigMap{
+         "bootstrap.servers": "localhost:9094",
+      },
+      ConsumerGroupConfig: []setup.ConsumerGroupConfig{
+         {
+            Count: 3,
+            Topics: []string{constants.KafkaTopicLogs},
+            Config: &kafka.ConfigMap{
+               "bootstrap.servers": constants.KafkaBrokers,
+               "group.id":          constants.KafkaTopicLogs,
+               "auto.offset.reset": "earliest",
+               "enable.auto.commit": false,
+               "enable.auto.offset.store": true, // auto in-mem offset update
+            },
+            Processor: logProcessor,
+         },
+                  {
+            Count: 3,
+            Topics: []string{constants.KafkaTopicLogsDLQ},
+            Config: &kafka.ConfigMap{
+               "bootstrap.servers": constants.KafkaBrokers,
+               "group.id":          constants.KafkaTopicLogsDLQ,
+               "auto.offset.reset": "earliest",
+               "enable.auto.commit": false,
+               "enable.auto.offset.store": true, // auto in-mem offset update
+            },
+            Processor: logDLQProcessor,
+         },
+         {
+            Count: 3,
+            Topics: []string{constants.KafkaTopicLogsDLQPermanent},
+            Config: &kafka.ConfigMap{
+               "bootstrap.servers": constants.KafkaBrokers,
+               "group.id":          constants.KafkaTopicLogsDLQPermanent,
+               "auto.offset.reset": "earliest",
+               "enable.auto.commit": false,
+               "enable.auto.offset.store": true, // auto in-mem offset update
+            },
+            Processor: logDLQPermanentProcessor,
+         },
+
+      },
    }
+
+   setup.InitService(&cfg)
+	os.Exit(1) // Ensure the program exits with a zero status code
 }

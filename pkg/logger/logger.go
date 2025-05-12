@@ -27,7 +27,7 @@ func init() {
       // Add a default field
       Logger = Logger.WithField("service", "my-service").Logger
 
-      Info("Logger initialized", logrus.Fields{"appEnv": appEnv})
+      Info("Logger initialized", logrus.Fields{"APP_ENV": appEnv})
    })
 }
 

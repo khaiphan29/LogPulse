@@ -23,3 +23,9 @@ var AllowedLogLevels = map[string]bool{
 	"ERROR": true,
 	"FATAL": true,
 }
+
+var AllowedSources = map[string]bool{
+   "auth-service": true,
+   "payment-service": true,
+   "api-gateway": true,
+}
