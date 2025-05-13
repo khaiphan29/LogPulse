@@ -32,6 +32,12 @@ You have to be in project root directory to run the following command.
 Moreover, you can configure `kafka_server.properties` to your desired logs path and ports.
 
 ```bash
-kafka-server-start config/kafka_server.properties
+make setup-kafka-brokers
+make create-kafka-topics
 ```
 
+### ElasticSearch
+```
+make start-es
+make setup-es-indexes
+```
