@@ -22,12 +22,20 @@ setup-kafka-topics:
 	@echo "Creating Kafka topics..."
 	go run ./deployments/create_kafka_topics.go
 
-start-kafka-broker1:
+start-kafka-broker:
 	@echo "Starting Kafka Broker 1..."
 	kafka-server-start ./configs/kafka/broker1.properties
 
 show-kafka-topics:
 	kafka-topics --bootstrap-server localhost:$(KAFKA_BROKER1_PORT) --list
+
+start-es:
+	@echo "Starting Elasticsearch..."
+	docker-compose up
+
+setup-es-indexes:
+	@echo "Setting up Elasticsearch indexes..."
+	go run ./cmd/create_es_indexes/main.go
 
 dev:
 	export APP_ENV=development

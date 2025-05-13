@@ -14,6 +14,7 @@ import (
    "github.com/khaiphan29/logpulse/internal/api/handlers"
    mykafka "github.com/khaiphan29/logpulse/internal/kafka"
 	"github.com/khaiphan29/logpulse/pkg/logger"
+   "github.com/khaiphan29/logpulse/internal/alert"
 )
 
 type ConsumerGroupConfig struct {
@@ -90,9 +91,25 @@ func InitService(cfg *ServiceConfig) {
    }()
    defer shutdownHTTPServer(s)
 
+   // Initialize alerting system
+   alertCtx, alertCancel := context.WithCancel(context.Background())
+   go func() {
+      logger.Info("Starting alerting system", nil)
+      for {
+         select {
+         case <-alertCtx.Done():
+            logger.Info("Stopping alerting system", nil)
+            return
+         default:
+            alert.ErrorAlert()
+         }
+      time.Sleep(5 * time.Second)
+      }
+   }()
+   defer alertCancel()
+
    // Set up a graceful shutdown
    quit := make(chan os.Signal, 1)
-   defer close(quit)
    // Wait for a signal to shut down
    // the process will not terminate immediately when the signal is received.
    signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

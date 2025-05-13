@@ -10,4 +10,7 @@ const (
    KafkaTopicLogs = "logs"
    KafkaTopicLogsDLQ = "logs-dlq"
    KafkaTopicLogsDLQPermanent = "logs-dlq-permanent"
+
+   //ES
+   ESIndexLogs = "logs"
 )

@@ -1,13 +1,13 @@
 0
 14
-__consumer_offsets 3 12
-__consumer_offsets 0 5
+__consumer_offsets 3 69
+__consumer_offsets 0 60
 logs-dlq 0 0
-logs 0 7
+logs 0 19
 logs-dlq-permanent 0 0
 __consumer_offsets 4 0
 logs 2 0
-__consumer_offsets 2 20
+__consumer_offsets 2 85
 logs-dlq 2 0
 __consumer_offsets 1 4
 logs-dlq 1 0
