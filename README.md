@@ -33,3 +33,6 @@ make start-es
 make run
 ```
 
+## Future Work
+- [ ] Tokenized logs search
+- [ ] More logs analysis features
