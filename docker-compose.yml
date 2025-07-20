@@ -1,4 +1,50 @@
 services:
+  kafka:
+    image: bitnami/kafka:latest # Use the latest Bitnami Kafka image
+    environment:
+      # Any environment variable beginning with KAFKA_CFG_ will be mapped to its corresponding Apache Kafka key.
+      # Kraft
+      - KAFKA_CFG_NODE_ID=0  # Unique broker ID
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller  # Roles for the Kafka broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+
+      # Listeners and security protocols
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 # What Kafka tells the client to connect to
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER # For controller communication
+
+      # Network buffer sizes
+      - KAFKA_CFG_SOCKET_SEND_BUFFER_BYTES=102401
+      - KAFKA_CFG_SOCKET_RECEIVE_BUFFER_BYTES=102401
+      - KAFKA_CFG_SOCKET_REQUEST_MAX_BYTES=104857601
+
+      # Threads
+      - KAFKA_CFG_NUM_NETWORK_THREADS=4
+      - KAFKA_CFG_NUM_IO_THREADS=9
+
+      # Topic defaults
+      - KAFKA_CFG_NUM_PARTITIONS=2
+      - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=1
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=1 # The minimum number of replicas that must acknowledge a write before it is considered successful.
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+      - KAFKA_CFG_COMPRESSION_TYPE=producer
+
+      # Log retention
+      - KAFKA_CFG_LOG_RETENTION_HOURS=170 # 8 days
+      - KAFKA_CFG_LOG_SEGMENT_BYTES=1073741826
+      - KAFKA_CFG_LOG_RETENTION_CHECK_INTERVAL_MS=300002
+      - KAFKA_CFG_LOG_CLEANUP_POLICY=delete
+      - KAFKA_CFG_LOG_RETENTION_BYTES=-1
+      - KAFKA_CFG_LOG_MESSAGE_TIMESTAMP_TYPE=CreateTime
+
+    ports:
+      - "9092:9092"  # Kafka broker port
+      - "9093:9093"  # Controller port
+
+    volumes:
+      - kafka_data:/bitnami/kafka  # Persistent storage for Kafka data
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.4.0
     environment:
@@ -18,4 +64,6 @@ services:
 
 volumes:
   es_data:
+    driver: local
+  kafka_data:
     driver: local
