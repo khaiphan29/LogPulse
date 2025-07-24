@@ -4,38 +4,38 @@ API_PORT = 8080
 AIR_CMD = air
 TEMP_DIR = tmp
 
-KAFKA_BROKER1_PORT = 9094
-KAFKA_BROKER1_LOG_DIR = logs/broker1-logs
-KAFKA_BROKER1_METADATA_DIR = logs/broker1-metadata
+KAFKA_PORT ?= 9092
+KAFKA_LOCAL_LOG_DIR = logs/broker1-logs
+KAFKA_LOCAL_METADATA_DIR = logs/broker1-metadata
 
 # Ensure that clean, build, and run are treated as commands to execute, not as files or directories
 .PHONY: dev run utest tes setup-kafka-brokers setup-kafka-topics help
 
+# Local Kafka setup
 setup-kafka-brokers:
 	@echo "Setting up Kafka..."
 	@echo "Formatting broker 1..."
 	kafka-storage format --config ./configs/kafka/broker1.properties --cluster-id $(shell kafka-storage random-uuid)
-	@echo "Starting Kafka Broker 1 on port $(KAFKA_BROKER1_PORT)..."
+	@echo "Starting Kafka Broker 1 on port $(KAFKA_PORT)..."
 	kafka-server-start ./configs/kafka/broker1.properties
-
-setup-kafka-topics:
-	@echo "Creating Kafka topics..."
-	go run ./deployments/create_kafka_topics.go
 
 start-kafka-broker:
 	@echo "Starting Kafka Broker 1..."
 	kafka-server-start ./configs/kafka/broker1.properties
 
 show-kafka-topics:
-	kafka-topics --bootstrap-server localhost:$(KAFKA_BROKER1_PORT) --list
+	kafka-topics --bootstrap-server localhost:$(KAFKA_PORT) --list
 
-start-es:
-	@echo "Starting Elasticsearch..."
-	docker-compose up
+start-containers:
+	@echo "Starting Docker containers (DETACHED mode)..."
+	docker-compose up -d
 
-setup-es-indexes:
+# Example: make provision KAFKA_PORT=9092
+provision:
 	@echo "Setting up Elasticsearch indexes..."
 	go run ./cmd/create_es_indexes/main.go
+	@echo "Creating Kafka topics..."
+	go run ./deployments/create_kafka_topics.go $(KAFKA_PORT)
 
 dev:
 	export APP_ENV=development
