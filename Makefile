@@ -9,7 +9,7 @@ KAFKA_LOCAL_LOG_DIR = logs/broker1-logs
 KAFKA_LOCAL_METADATA_DIR = logs/broker1-metadata
 
 # Ensure that clean, build, and run are treated as commands to execute, not as files or directories
-.PHONY: dev run utest tes setup-kafka-brokers setup-kafka-topics help
+.PHONY: dev run utest test setup-kafka-brokers setup-kafka-topics help
 
 # Local Kafka setup
 setup-kafka-brokers:
@@ -35,7 +35,7 @@ provision:
 	@echo "Setting up Elasticsearch indexes..."
 	go run ./cmd/create_es_indexes/main.go
 	@echo "Creating Kafka topics..."
-	go run ./deployments/create_kafka_topics.go $(KAFKA_PORT)
+	go run ./cmd/create_kafka_topics/main.go $(KAFKA_PORT)
 
 dev:
 	export APP_ENV=development
