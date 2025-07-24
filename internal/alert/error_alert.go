@@ -113,16 +113,9 @@ func GetErrorBySources(timeInterval string, threshold int) ([]map[string]int, er
 
    // Extract the "by_source" aggregation
    bySourceAgg := aggregations["by_source"].(map[string]interface{})
-   logger.Info("bySourceAgg", map[string]any{
-      "aggregations": bySourceAgg,
-   })
-
 
    // Extract the "buckets" array from the "by_source" aggregation
    buckets := bySourceAgg["buckets"].([]interface{})
-   logger.Info("buckets of source", map[string]any{
-      "aggregations": buckets,
-   })
 
 	var filteredResults []map[string]int
 

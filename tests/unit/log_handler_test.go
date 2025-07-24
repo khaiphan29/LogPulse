@@ -1,4 +1,4 @@
-package loghandlertests
+package unit_test
 
 import (
 	"bytes"
