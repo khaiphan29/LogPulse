@@ -12,7 +12,7 @@ import (
 
 // CreateIndex creates an ElasticSearch index with the specified mapping
 func (client *Client) CreateIndex(indexName string, mapping []byte) error {
-	res, err := client.Indices.Create(indexName, esClient.Indices.Create.WithBody(bytes.NewReader(mapping)))
+	res, err := client.Indices.Create(indexName, client.Indices.Create.WithBody(bytes.NewReader(mapping)))
 	if err != nil {
       return err
 	}
