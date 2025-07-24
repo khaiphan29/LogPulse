@@ -7,7 +7,7 @@ import (
 )
 
 type Client struct {
-   esClient *elasticsearch.Client
+   *elasticsearch.Client
    port string
 }
 
@@ -19,8 +19,7 @@ func InitClient(port string) *Client {
       return client
    }
 
-	var err error
-	client.esClient, err = elasticsearch.NewClient(elasticsearch.Config{
+   esClient, err := elasticsearch.NewClient(elasticsearch.Config{
 		Addresses: []string{
 			"http://localhost:" + port,
 		},
@@ -31,6 +30,11 @@ func InitClient(port string) *Client {
       })
 	} else {
       logger.Info("Elasticsearch client created successfully", nil)
+   }
+
+   client = &Client{
+      Client: esClient,
+      port:   port,
    }
 
    return client
@@ -53,4 +57,12 @@ func (client *Client) ChangePort(port string) {
    logger.Info("Elasticsearch client port changed", map[string]any{
       "port": port,
    })
+}
+
+func (client *Client) GetPort() string {
+   if client == nil {
+      logger.Error("Elasticsearch client is not initialized", nil)
+      return ""
+   }
+   return client.port
 }

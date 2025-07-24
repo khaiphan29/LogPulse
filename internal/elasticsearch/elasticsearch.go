@@ -11,30 +11,43 @@ import (
 )
 
 // CreateIndex creates an ElasticSearch index with the specified mapping
-func (client *Client) CreateIndex(indexName string, mapping []byte) {
-   esClient := client.esClient
-	res, err := esClient.Indices.Create(indexName, esClient.Indices.Create.WithBody(bytes.NewReader(mapping)))
+func (client *Client) CreateIndex(indexName string, mapping []byte) error {
+	res, err := client.Indices.Create(indexName, esClient.Indices.Create.WithBody(bytes.NewReader(mapping)))
 	if err != nil {
-      logger.Fatal("Error creating index", map[string]any{
-         "index": indexName,
-         "error": err,
-      })
+      return err
 	}
 	defer res.Body.Close()
+
 	if res.IsError() {
-      logger.Error("Error response from ElasticSearch", map[string]any{
-         "error": res.String(),
-      })
+      return fmt.Errorf("Error response from ElasticSearch: %s", res.String())
 	} else {
       logger.Info("Index created successfully", map[string]any{
          "index": indexName,
       })
 	}
+
+   return nil
 }
+
+func (client *Client) DeleteIndex(indexName string) error {
+   res, err := client.Indices.Delete([]string{indexName})
+   if err != nil {
+      return err
+   }
+   defer res.Body.Close()
+   if res.IsError() {
+      return fmt.Errorf("error deleting index %s: %s", indexName, res.String())
+   } else {
+      logger.Info("Index deleted successfully", map[string]any{
+         "index": indexName,
+      })
+   }
+   return nil
+}
+
 
 // SendToIndex sends a document to the specified index in ElasticSearch
 func (client *Client) SendToIndex(indexName string, document interface{}) error {
-   esClient := client.esClient
 	// Marshal the document into JSON
 	payloadJSON, err := json.Marshal(document)
 	if err != nil {
@@ -42,10 +55,10 @@ func (client *Client) SendToIndex(indexName string, document interface{}) error 
 	}
 
 	// Send the document to the ElasticSearch index
-	res, err := esClient.Index(
+	res, err := client.Index(
 		indexName,
 		bytes.NewReader(payloadJSON),
-		esClient.Index.WithRefresh("true"), // Immediately make it available for search
+		client.Index.WithRefresh("true"), // Immediately make it available for search
 	)
 	if err != nil {
       return err
@@ -66,11 +79,10 @@ func (client *Client) SendToIndex(indexName string, document interface{}) error 
 // CountLogsByLevelAndSource counts logs grouped by log level and source
 // ExecuteQuery takes an ElasticSearch query as input and executes it
 func (client *Client) ExecuteQuery(indexName string, query string) (*esapi.Response, error) {
-   esClient := client.esClient
 	// Execute the search query
-	res, err := esClient.Search(
-		esClient.Search.WithIndex(indexName),
-		esClient.Search.WithBody(bytes.NewReader([]byte(query))),
+	res, err := client.Search(
+		client.Search.WithIndex(indexName),
+		client.Search.WithBody(bytes.NewReader([]byte(query))),
 	)
 	if err != nil {
       return nil, err
