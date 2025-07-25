@@ -8,22 +8,24 @@ KAFKA_PORT ?= 9092
 KAFKA_LOCAL_LOG_DIR = logs/broker1-logs
 KAFKA_LOCAL_METADATA_DIR = logs/broker1-metadata
 
+ES_PORT ?= 9200
+
 # Ensure that clean, build, and run are treated as commands to execute, not as files or directories
 .PHONY: dev run utest test setup-kafka-brokers setup-kafka-topics help
 
-# Local Kafka setup
-setup-kafka-brokers:
-	@echo "Setting up Kafka..."
-	@echo "Formatting broker 1..."
-	kafka-storage format --config ./configs/kafka/broker1.properties --cluster-id $(shell kafka-storage random-uuid)
-	@echo "Starting Kafka Broker 1 on port $(KAFKA_PORT)..."
-	kafka-server-start ./configs/kafka/broker1.properties
+# Local Kafka setup - Deprecated
+# setup-kafka-brokers:
+# 	@echo "Setting up Kafka..."
+# 	@echo "Formatting broker 1..."
+# 	kafka-storage format --config ./configs/kafka/broker1.properties --cluster-id $(shell kafka-storage random-uuid)
+# 	@echo "Starting Kafka Broker 1 on port $(KAFKA_PORT)..."
+# 	kafka-server-start ./configs/kafka/broker1.properties
+#
+# start-kafka-broker:
+# 	@echo "Starting Kafka Broker 1..."
+# 	kafka-server-start ./configs/kafka/broker1.properties
 
-start-kafka-broker:
-	@echo "Starting Kafka Broker 1..."
-	kafka-server-start ./configs/kafka/broker1.properties
-
-show-kafka-topics:
+list-kafka-topics:
 	kafka-topics --bootstrap-server localhost:$(KAFKA_PORT) --list
 
 start-containers:
@@ -33,7 +35,7 @@ start-containers:
 # Example: make provision KAFKA_PORT=9092
 provision:
 	@echo "Setting up Elasticsearch indexes..."
-	go run ./cmd/create_es_indexes/main.go
+	go run ./cmd/create_es_indexes/main.go $(ES_PORT)
 	@echo "Creating Kafka topics..."
 	go run ./cmd/create_kafka_topics/main.go $(KAFKA_PORT)
 
