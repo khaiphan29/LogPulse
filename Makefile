@@ -55,8 +55,8 @@ clean:
 	rm -rf $(TEMP_DIR)
 
 utest:
-	export APP_ENV=test
-	@echo "Running unit tests..."
+	@export APP_ENV=test; \
+	echo "Running unit tests..."; \
 	go test -v ./tests/unit
 
 help:
