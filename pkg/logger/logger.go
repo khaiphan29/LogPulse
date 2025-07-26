@@ -32,10 +32,11 @@ func init() {
 }
 
 func getLogLevel(env string) logrus.Level {
+   Debug("getLogLevel called with APP_ENV:", logrus.Fields{"env": env})
    switch env {
-   case "production":
+   case "prod":
       return logrus.WarnLevel
-   case "development":
+   case "dev":
       return logrus.DebugLevel
    case "test":
       return logrus.InfoLevel
