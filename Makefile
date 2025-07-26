@@ -40,12 +40,13 @@ provision:
 	go run ./cmd/create_kafka_topics/main.go $(KAFKA_PORT)
 
 dev:
-	export APP_ENV=development
-	@echo "Starting Go Server with Air..."
+	make start-containers; \
+	@export APP_ENV=dev; \
+	echo "Starting Go Server with Air..."; \
 	@$(AIR_CMD)
 
 run:
-	export APP_ENV=development
+	export APP_ENV=dev
 	@echo "Starting Go Server..."
 	go build -o ./tmp/app $(API_FILE)
 	./tmp/app $(API_PORT)
@@ -61,6 +62,9 @@ utest:
 
 help:
 	@echo "Available commands:"
+	@echo "  make provision - Set up Elasticsearch indexes and create Kafka topics"
 	@echo "  make dev   - Start the Go server with Air for live reloading"
 	@echo "  make run   - Start the Go server"
 	@echo "  make clean - Clean up temporary files"
+	@echo "  make utest - Run unit tests"
+
