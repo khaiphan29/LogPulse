@@ -48,4 +48,4 @@ jobs:
       - name: Shutdown services
         if: hashFiles('docker-compose.yml') != ''
         run: |
-          docker-compose down
+          docker compose down
