@@ -1,0 +1,42 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        run: |
+          go version
+          go mod tidy
+
+      - name: Start services
+        if: hashFiles('docker-compose.yml') != ''
+        run: |
+          docker-compose up -d
+
+      - name: Wait for services to be ready
+        if: hashFiles('docker-compose.yml') != ''
+        run: |
+          echo "Waiting for services to be ready..."
+          sleep 10  # Adjust the sleep time as necessary
+
+      - name: Run tests
+        run: |
+          make utest
+
+      - name: Shutdown services
+        if: hashFiles('docker-compose.yml') != ''
+        run: |
+          docker-compose down
