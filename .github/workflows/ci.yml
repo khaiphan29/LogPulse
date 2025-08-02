@@ -25,10 +25,15 @@ jobs:
           go version
           go mod tidy
 
+      - name: Show Docker and Compose versions
+        run: |
+          docker --version
+          docker compose version
+
       - name: Start services
         if: hashFiles('docker-compose.yml') != ''
         run: |
-          docker-compose up -d
+          docker compose up -d
 
       - name: Wait for services to be ready
         if: hashFiles('docker-compose.yml') != ''
