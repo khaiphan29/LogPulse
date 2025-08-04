@@ -62,8 +62,16 @@ services:
     volumes:
       - es_data:/usr/share/elasticsearch/data  # Persistent storage for ElasticSearch data
 
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"  # Redis port
+    volumes:
+      - redis_data:/data  # Persistent storage for Redis data
+
 volumes:
   es_data:
     driver: local
   kafka_data:
     driver: local
+  redis_data:
