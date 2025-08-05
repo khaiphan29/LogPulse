@@ -6,7 +6,6 @@ require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.10.0
 	github.com/elastic/go-elasticsearch/v9 v9.0.0
 	github.com/gin-gonic/gin v1.10.0
-	github.com/go-playground/assert/v2 v2.2.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
 )
