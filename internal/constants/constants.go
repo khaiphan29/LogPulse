@@ -3,14 +3,18 @@ package constants
 
 const (
    //HTTP Server
-   HTTPServerPort = ":8080"
+   HTTP_SERVER_PORT = ":8080"
 
    //Kafka Topic
-   KafkaBrokers = "localhost:9094"
-   KafkaTopicLogs = "logs"
-   KafkaTopicLogsDLQ = "logs-dlq"
-   KafkaTopicLogsDLQPermanent = "logs-dlq-permanent"
+   KAFKA_BROKER_URL = "localhost:9094"
+   KAFKA_TOPIC_LOGS = "logs"
+   KAFKA_TOPIC_LOGS_DLQ = "logs-dlq"
+   KAFKA_TOPIC_LOGS_DLQ_PERMANENT = "logs-dlq-permanent"
 
    //ES
-   ESIndexLogs = "logs"
+   ES_INDEX_LOG = "logs"
+   ES_PORT = "9200"
+
+   // Redis
+   REDIS_PORT = "6379"
 )

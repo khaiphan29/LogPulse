@@ -6,13 +6,12 @@ import (
 	es "github.com/khaiphan29/logpulse/internal/elasticsearch"
 	"github.com/khaiphan29/logpulse/pkg/logger"
    "github.com/stretchr/testify/assert"
+   "github.com/khaiphan29/logpulse/internal/constants"
 )
-
-const ES_PORT = "9200"
 
 func init() {
    // Initialize the Elasticsearch client
-   esClient := es.InitClient(ES_PORT)
+   esClient := es.InitClient(constants.ES_PORT)
    if esClient == nil {
       logger.Fatal("Failed to initialize Elasticsearch client", nil)
    }
