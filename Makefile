@@ -57,6 +57,7 @@ clean:
 
 utest:
 	@export APP_ENV=test; \
+	make start-containers; \
 	echo "Running unit tests..."; \
 	go test -v ./tests/unit
 
