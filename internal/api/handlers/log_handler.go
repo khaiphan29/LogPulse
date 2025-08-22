@@ -51,7 +51,7 @@ func (h *Handler) POSTLog(c *gin.Context) {
    c.JSON(http.StatusOK, gin.H{"message": "Log received"})
 
    // Send the log data to Kafka
-   topic := constants.KafkaTopicLogs
+   topic := constants.KAFKA_TOPIC_LOGS
    key := []byte(logData.Source)
    value, err := json.Marshal(logData)
    if err != nil {

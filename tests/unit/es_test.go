@@ -41,7 +41,7 @@ func TestCreateIndex(t *testing.T) {
 
    err := esClient.CreateIndex(indexName, []byte(mapping))
 
-   assert.Equal(t, err, nil)
+   assert.Equal(t, nil, err, "Index creation should not return an error")
 }
 
 func TestSendToIndex(t *testing.T) {
@@ -51,7 +51,7 @@ func TestSendToIndex(t *testing.T) {
    }
 
    indexName := "test_index"
-   document := map[string]interface{}{
+   document := map[string]any{
       "logId":      "12345",
       "timestamp":  "2023-10-01T12:00:00Z",
       "logLevel":   "INFO",
@@ -64,7 +64,7 @@ func TestSendToIndex(t *testing.T) {
 
    err := esClient.SendToIndex(indexName, document)
 
-   assert.Equal(t, err, nil)
+   assert.Equal(t, nil, err, "Sending document to index should not return an error")
 }
 
 func TestExecuteQuery(t *testing.T) {

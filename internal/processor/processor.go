@@ -22,7 +22,7 @@ func (lp *LogProcessor) Process(message *kafka.Message) error {
       return err
    }
 
-   if err := es.SendToIndex(constants.KafkaTopicLogs, log); err != nil {
+   if err := es.SendToIndex(constants.KAFKA_TOPIC_LOGS, log); err != nil {
       return err
    }
 

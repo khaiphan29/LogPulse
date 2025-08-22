@@ -48,16 +48,16 @@ func GetClient() *Client {
    return client
 }
 
-func (client *Client) ChangePort(port string) {
-   if client == nil {
-      logger.Error("Elasticsearch client is not initialized", nil)
-      return
-   }
-   client.port = port
-   logger.Info("Elasticsearch client port changed", map[string]any{
-      "port": port,
-   })
-}
+// func (client *Client) ChangePort(port string) {
+//    if client == nil {
+//       logger.Error("Elasticsearch client is not initialized", nil)
+//       return
+//    }
+//    client.port = port
+//    logger.Info("Elasticsearch client port changed", map[string]any{
+//       "port": port,
+//    })
+// }
 
 func (client *Client) GetPort() string {
    if client == nil {
