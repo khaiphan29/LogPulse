@@ -4,107 +4,105 @@ import (
 	"context"
 	"errors"
 	"time"
+   "sync"
+
+   "github.com/redis/go-redis/v9"
+   "github.com/khaiphan29/logpulse/internal/constants"
 )
 
 const (
 	TIMEOUT = 200 * time.Millisecond // Default timeout
-	PREFIX  = "cache:"
+   PREFIX  = "logpulse:cache:"
+   DB      = 0                     // Default DB
+   DEFAULT_EXPIRATION = 24 * time.Hour // Default expiration time for cache records
+   DEFAULT_CONTEXT_TIMEOUT = 100 * time.Millisecond // Default context timeout
 )
 
-// Client is a wrapper around the Redis (or any satisfied services) client
-type cacheClient interface {
-	SetRecord(ctx context.Context, key string, value string, exp time.Duration) error
-	GetRecord(ctx context.Context, key string) (any, error)
-	DeleteRecord(ctx context.Context, key string) error
-	ErrKeyNotExists(error) bool
-	IncreaseValue(ctx context.Context, key string, value int64) (int64, error)
-	DecreaseValue(ctx context.Context, key string, value int64) (int64, error)
+type Client struct {
+   *redis.Client
 }
 
-var client cacheClient
+var (
+   instance *Client
+   once     sync.Once
+)
 
-var ErrCacheMiss = errors.New("Cache miss: key does not exist")
-
-// InitCacheClient initializes the cache client with the provided implementation
-func InitCacheClient(c cacheClient) error {
-	if client != nil {
-		return errors.New("Cache client is already initialized")
-	} else if c == nil {
-		return errors.New("Cache client cannot be nil")
-	}
-	client = c
-	return nil
+func init() {
+   once.Do(func() {
+      reidsClient := redis.NewClient(&redis.Options{
+         Addr:     "localhost:" + constants.REDIS_PORT,
+         Password: "",
+         DB:       DB, // Use default DB
+      })
+      instance = &Client{
+         Client: reidsClient,
+      }
+   })
 }
 
-func Get(key string) (any, error) {
-	if client == nil {
-		return nil, errors.New("Cache client is not initialized")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
-	defer cancel()
-	value, err := client.GetRecord(ctx, PREFIX+key)
-	if err != nil {
-		if client.ErrKeyNotExists(err) {
-			return nil, ErrCacheMiss // Key does not exist
-		}
-		return nil, err // Some other error
-	}
-	return value, nil
+func Instance() (*Client, error) {
+   return instance, nil
 }
 
-func Set(key string, value string, exp time.Duration) error {
-	if client == nil {
-		return errors.New("Cache client is not initialized")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
-	defer cancel()
-	err := client.SetRecord(ctx, PREFIX+key, value, exp)
-	if err != nil {
-		return err // Some other error
-	}
-	return nil
+func (client *Client) SetRecord(key string, value any, exp time.Duration) error {
+   fullKey := PREFIX + key
+   ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_CONTEXT_TIMEOUT)
+   defer cancel()
+   err := client.Set(ctx, fullKey, value, exp).Err()
+   if err != nil {
+      return err
+   }
+   return nil
 }
 
-func Increase(key string, increment int64) (int64, error) {
-	if client == nil {
-		return 1, errors.New("Cache client is not initialized")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
-	defer cancel()
-	newValue, err := client.IncreaseValue(ctx, PREFIX+key, increment)
-	if err != nil {
-		return 1, err // Some other error
-	}
-	return newValue, nil
+// Normal GetRecord function that returns a string value
+func (client *Client) GetRecord(key string) (string, error) {
+   fullKey := PREFIX + key
+   ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_CONTEXT_TIMEOUT)
+   defer cancel()
+   value, err := client.Get(ctx, fullKey).Result()
+   if err != nil {
+      return "", err
+   }
+   return value, nil
 }
 
-func Decrease(key string, decrement int64) (int64, error) {
-	if client == nil {
-		return 1, errors.New("Cache client is not initialized")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
-	defer cancel()
-	newValue, err := client.DecreaseValue(ctx, PREFIX+key, decrement)
-	if err != nil {
-		return 1, err // Some other error
-	}
-	return newValue, nil
+func (client *Client) ErrKeyNotExists(err error) bool {
+   if errors.Is(err, redis.Nil) {
+      return true
+   }
+   return false
 }
 
-func Delete(key string) error {
-	if client == nil {
-		return errors.New("Cache client is not initialized")
-	}
+func (client *Client) DeleteRecord(key string) error {
+   fullKey := PREFIX + key
+   ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_CONTEXT_TIMEOUT)
+   defer cancel()
+   err := client.Del(ctx, fullKey).Err()
+   if err != nil {
+      return err
+   }
+   return nil
+}
 
-	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
-	defer cancel()
-	err := client.DeleteRecord(ctx, PREFIX+key)
-	if err != nil {
-		return err // Some other error
-	}
-	return nil
+func (client *Client) IncreaseValue(key string, increment int64) (int64, error) {
+   fullKey := PREFIX + key
+   ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_CONTEXT_TIMEOUT)
+   defer cancel()
+   newValue, err := client.IncrBy(ctx, fullKey, increment).Result()
+   if err != nil {
+      return 0, err
+   }
+   return newValue, nil
+}
+
+func (client *Client) DecreaseValue(key string, decrement int64) (int64, error) {
+   fullKey := PREFIX + key
+   ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_CONTEXT_TIMEOUT)
+   defer cancel()
+   newValue, err := client.DecrBy(ctx, fullKey, decrement).Result()
+   if err != nil {
+      return 0, err
+   }
+   return newValue, nil
 }
