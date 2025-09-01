@@ -43,7 +43,7 @@ jobs:
 
       - name: Run tests
         run: |
-          make test
+          go test ./...
 
       - name: Shutdown services
         if: hashFiles('docker-compose.yml') != ''
