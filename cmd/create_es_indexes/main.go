@@ -4,18 +4,14 @@ import (
    "os"
 
    "github.com/khaiphan29/logpulse/pkg/logger"
-   es "github.com/khaiphan29/logpulse/internal/elasticsearch"
+   "github.com/khaiphan29/logpulse/internal/es/client"
+   "github.com/khaiphan29/logpulse/internal/es/index"
    "github.com/khaiphan29/logpulse/internal/constants"
 )
 
 func main() {
-   if len(os.Args) < 2 {
-      logger.Error("Arg: ES_PORT missing", nil)
-      return
-   }
-   // Create the index
    // Define index name and mapping
-	indexName := constants.ESIndexLogs
+	indexName := constants.ES_INDEX_LOG
 	mapping := `{
 		"mappings": {
 			"properties": {
@@ -30,13 +26,22 @@ func main() {
 			}
 		}
 	}`
-
-   client := es.InitClient(os.Args[1])
-   err := client.CreateIndex(indexName, []byte(mapping))
+   // Initialize the Elasticsearch client
+   client, err := esclient.NewClient(constants.ES_PORT)
    if err != nil {
       logger.Error("Failed to create index", map[string]any{
          "error": err,
       })
+   }
+
+   esIndex := esindex.New(client)
+   // Create the index
+   err = esIndex.CreateIndex(indexName, []byte(mapping))
+   if err != nil {
+      logger.Error("Failed to create index", map[string]any{
+         "error": err,
+      })
+      os.Exit(1)
    }
 }
 

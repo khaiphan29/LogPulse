@@ -11,7 +11,7 @@ import (
 
 func main() {
    // Start the server
-   port := constants.HTTPServerPort
+   port := constants.HTTP_SERVER_PORT
    if (len(os.Args) > 1) {
       port = ":" + os.Args[1]
    }
@@ -23,17 +23,17 @@ func main() {
 
    cfg := setup.ServiceConfig{
       Port: port,
-      KafkaBrokers: constants.KafkaBrokers,
+      KafkaBrokers: constants.KAFKA_BROKER_URL,
       ProducerConfig: &kafka.ConfigMap{
          "bootstrap.servers": "localhost:9094",
       },
       ConsumerGroupConfig: []setup.ConsumerGroupConfig{
          {
             Count: 3,
-            Topics: []string{constants.KafkaTopicLogs},
+            Topics: []string{constants.KAFKA_TOPIC_LOGS},
             Config: &kafka.ConfigMap{
-               "bootstrap.servers": constants.KafkaBrokers,
-               "group.id":          constants.KafkaTopicLogs,
+               "bootstrap.servers": constants.KAFKA_BROKER_URL,
+               "group.id":          constants.KAFKA_TOPIC_LOGS,
                "auto.offset.reset": "earliest",
                "enable.auto.commit": false,
                "enable.auto.offset.store": true, // auto in-mem offset update
@@ -42,10 +42,10 @@ func main() {
          },
                   {
             Count: 3,
-            Topics: []string{constants.KafkaTopicLogsDLQ},
+            Topics: []string{constants.KAFKA_TOPIC_LOGS_DLQ},
             Config: &kafka.ConfigMap{
-               "bootstrap.servers": constants.KafkaBrokers,
-               "group.id":          constants.KafkaTopicLogsDLQ,
+               "bootstrap.servers": constants.KAFKA_BROKER_URL,
+               "group.id":          constants.KAFKA_TOPIC_LOGS_DLQ,
                "auto.offset.reset": "earliest",
                "enable.auto.commit": false,
                "enable.auto.offset.store": true, // auto in-mem offset update
@@ -54,10 +54,10 @@ func main() {
          },
          {
             Count: 3,
-            Topics: []string{constants.KafkaTopicLogsDLQPermanent},
+            Topics: []string{constants.KAFKA_TOPIC_LOGS_DLQ_PERMANENT},
             Config: &kafka.ConfigMap{
-               "bootstrap.servers": constants.KafkaBrokers,
-               "group.id":          constants.KafkaTopicLogsDLQPermanent,
+               "bootstrap.servers": constants.KAFKA_BROKER_URL,
+               "group.id":          constants.KAFKA_TOPIC_LOGS_DLQ_PERMANENT,
                "auto.offset.reset": "earliest",
                "enable.auto.commit": false,
                "enable.auto.offset.store": true, // auto in-mem offset update
