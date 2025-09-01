@@ -2,6 +2,8 @@ package constants
 // Package constants defines constants and types used throughout the application.
 
 const (
+   LOG_LEVEL_ERROR = "ERROR"
+
    //HTTP Server
    HTTP_SERVER_PORT = ":8080"
 
