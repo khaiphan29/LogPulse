@@ -67,5 +67,5 @@ help:
 	@echo "  make dev   - Start the Go server with Air for live reloading"
 	@echo "  make run   - Start the Go server"
 	@echo "  make clean - Clean up temporary files"
-	@echo "  make utest - Run unit tests"
+	@echo "  make test - Run unit tests"
 
