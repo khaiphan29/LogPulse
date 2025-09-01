@@ -2,6 +2,8 @@ package parser
 
 import (
 	"time"
+
+	"github.com/khaiphan29/logpulse/internal/constants"
 )
 
 // Use struct tag to validate using gin ShouldBindJSON
@@ -20,7 +22,7 @@ var AllowedLogLevels = map[string]bool{
 	"DEBUG": true,
 	"INFO":  true,
 	"WARN":  true,
-	"ERROR": true,
+   constants.LOG_LEVEL_ERROR  : true,
 	"FATAL": true,
 }
 
