@@ -1,23 +1,17 @@
 # LogPulse
-This is a real-time log monitoring tool that allows you to track and analyze logs from various sources.
+This is a low latency log monitoring tool that allows you to track and analyze logs from various sources.
 
 ## Set up
-### Kafka
-You have to be in project root directory to run the following command.
-Moreover, you can configure `kafka_server.properties` to your desired logs path and ports.
+### Create Kafka topics and ES indexes
 
 ```bash
-make setup-kafka-brokers
-make create-kafka-topics
+make start-containers
+make provision
 ```
 
-### ElasticSearch
-```
-make start-es
-make setup-es-indexes
 ```
 ## How to run
-1. Install air for live-updating the code.
+1. Install air for code live-updating.
 ```bash
 go install github.com/air-verse/air@latest
 ```
@@ -28,9 +22,7 @@ export PATH=$(go env GOPATH)/bin:$PATH
 2. Run the service
 ***Note***: Change the ports on [Makefile] to your desired ports.
 ```bash
-make start-kafka-broker
-make start-es
-make run
+make dev
 ```
 
 ## Future Work
