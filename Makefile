@@ -55,11 +55,11 @@ clean:
 	@echo "Cleaning up temporary files..."
 	rm -rf $(TEMP_DIR)
 
-utest:
+test:
 	@export APP_ENV=test; \
 	make start-containers; \
-	echo "Running unit tests..."; \
-	gotestsum --format testname -- -v ./tests/unit
+	echo "Running tests..."; \
+	gotestsum --format testname -- -v ./...
 
 help:
 	@echo "Available commands:"
