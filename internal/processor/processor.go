@@ -6,12 +6,17 @@ import (
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 
-	es "github.com/khaiphan29/logpulse/internal/elasticsearch"
 	"github.com/khaiphan29/logpulse/internal/api/parsing"
    "github.com/khaiphan29/logpulse/internal/constants"
 )
 
-type LogProcessor struct {}
+type LogProcessor struct {
+   LogConsumer LogConsumer
+}
+
+type LogConsumer interface {
+   CreateDocument(index string, document any) error
+}
 
 func (lp *LogProcessor) Process(message *kafka.Message) error {
    // Process the message
@@ -22,7 +27,7 @@ func (lp *LogProcessor) Process(message *kafka.Message) error {
       return err
    }
 
-   if err := es.SendToIndex(constants.KAFKA_TOPIC_LOGS, log); err != nil {
+   if err := lp.LogConsumer.CreateDocument(constants.ES_INDEX_LOG, log); err != nil {
       return err
    }
 
