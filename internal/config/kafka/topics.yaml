@@ -1,0 +1,25 @@
+topics:
+  logs:
+    name: logs
+    partitions: 3
+    compression_type: lz4
+    retention_ms: 604800000   # 7 days
+
+  logs-dlq:
+    name: logs-dlq
+    partitions: 3
+    compression_type: lz4
+    retention_ms: -1
+
+  logs-dlq-permanent:
+    name: logs-dlq-permanent
+    partitions: 3
+    compression_type: lz4
+    retention_ms: -1
+
+  __consumer_offsets:
+    name: __consumer_offsets
+    partitions: 5
+    cleanup_policy: compact
+    retention_ms: -1
+
