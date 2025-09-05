@@ -1,47 +1,26 @@
 package main
 
 import (
-   "os"
-
+   "github.com/khaiphan29/logpulse/internal/config/es"
    "github.com/khaiphan29/logpulse/pkg/logger"
-   "github.com/khaiphan29/logpulse/internal/es/client"
-   "github.com/khaiphan29/logpulse/internal/es/index"
-   "github.com/khaiphan29/logpulse/internal/constants"
+   "github.com/khaiphan29/logpulse/internal/setup"
 )
 
 func main() {
-   // Define index name and mapping
-	indexName := constants.ES_INDEX_LOG
-	mapping := `{
-		"mappings": {
-			"properties": {
-				"logId": { "type": "keyword" },
-				"timestamp": { "type": "date" },
-				"logLevel": { "type": "keyword" },
-				"message": { "type": "text", "analyzer": "standard" },
-				"metadata": { "type": "object" },
-				"source": { "type": "keyword" },
-				"environment": { "type": "keyword" },
-				"type": { "type": "keyword" }
-			}
-		}
-	}`
-   // Initialize the Elasticsearch client
-   client, err := esclient.NewClient(constants.ES_PORT)
-   if err != nil {
-      logger.Error("Failed to create index", map[string]any{
-         "error": err,
-      })
-   }
+   // Load Elasticsearch configuration
+   esService := setup.SetUpESSerive()
+   indexCfg := esconfig.LoadIndexConfig("./internal/config/es/log_mapping.json")
 
-   esIndex := esindex.New(client)
    // Create the index
-   err = esIndex.CreateIndex(indexName, []byte(mapping))
+   err := esService.Index.CreateIndex(indexCfg.Name, []byte(indexCfg.Mapping))
    if err != nil {
       logger.Error("Failed to create index", map[string]any{
          "error": err,
       })
-      os.Exit(1)
+   } else {
+      logger.Info("Index created successfully", map[string]any{
+         "index": indexCfg.Name,
+      })
    }
 }
 

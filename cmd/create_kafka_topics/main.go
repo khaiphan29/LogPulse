@@ -2,61 +2,34 @@ package main
 
 import (
    "os"
-   "fmt"
 	"context"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 
+   "github.com/khaiphan29/logpulse/internal/setup"
    "github.com/khaiphan29/logpulse/pkg/logger"
 )
 
-// Topic specification with compression
-var topics = []kafka.TopicSpecification{
-	{
-		Topic:             "logs",
-		NumPartitions:     3,
-		Config: map[string]string{
-			"compression.type": "lz4",        // Set compression type at the topic level
-			"retention.ms":     "604800000", // 7 days retention
-		},
-	},
-	{
-		Topic:             "logs-dlq",
-		NumPartitions:     3,
-		Config: map[string]string{
-			"compression.type": "lz4",        // Set compression type at the topic level
-			"retention.ms":     "604800000", // 7 days retention
-		},
-	},
-	{
-		Topic:             "logs-dlq-permanent",
-		NumPartitions:     3,
-		Config: map[string]string{
-			"compression.type": "lz4",        // Set compression type at the topic level
-			"retention.ms":     "-1",         // keep it forever
-		},
-	},
-   {
-      Topic:             "__consumer_offsets",
-      NumPartitions:     5,
-      Config: map[string]string{
-         "retention.ms":     "-1",         // keep it forever
-         "cleanup.policy":   "compact",    // Compact the topic
-      },
-   },
+
+func buildTopicSpecifications() []kafka.TopicSpecification {
+   topicsCfg := setup.GetKafkaTopicsCfg()
+   topicSpecs := make([]kafka.TopicSpecification, 0, len(topicsCfg))
+   for _, cfg := range topicsCfg {
+      topicSpec := kafka.TopicSpecification{
+         Topic:         cfg.Name,
+         NumPartitions: cfg.Partitions,
+         Config:        cfg.GetConfigMap(),
+      }
+      topicSpecs = append(topicSpecs, topicSpec)
+   }
+
+   return topicSpecs
 }
 
 func main() {
-   if len(os.Args) < 2 {
-      logger.Error("Usage: create_kafka_topics <broker1_port>", nil)
-      return
-   }
-
    // Create admin client
-   port := os.Args[1]
-   server := fmt.Sprintf("localhost:%s", port)
-	admin, err := kafka.NewAdminClient(&kafka.ConfigMap{"bootstrap.servers": server})
+	admin, err := kafka.NewAdminClient(&kafka.ConfigMap{"bootstrap.servers": os.Getenv("KAFKA_BOOTSTRAP_SERVERS")})
 	if err != nil {
       logger.Error("Failed to create Kafka Admin client", map[string]any{
          "error": err,
@@ -69,7 +42,8 @@ func main() {
 	defer cancel()
 
    // Create topics
-	results, err := admin.CreateTopics(ctx, topics)
+   topicConfigs := buildTopicSpecifications()
+	results, err := admin.CreateTopics(ctx, topicConfigs, kafka.SetAdminOperationTimeout(30*time.Second))
 
    // API Level failure
 	if err != nil {
