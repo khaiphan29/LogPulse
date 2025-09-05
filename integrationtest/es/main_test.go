@@ -4,10 +4,7 @@ import (
    "os"
    "testing"
 
-   "github.com/khaiphan29/logpulse/internal/es/index"
-   "github.com/khaiphan29/logpulse/internal/es/client"
-
-   "github.com/khaiphan29/logpulse/internal/constants"
+   "github.com/khaiphan29/logpulse/internal/setup"
    "github.com/khaiphan29/logpulse/pkg/logger"
 )
 
@@ -16,20 +13,13 @@ const (
 )
 
 var (
-   esClient *esclient.ESCLient
+   esService *setup.ESServices
 )
 
 func TestMain(m *testing.M) {
    // Initialize the Elasticsearch client
-   var err error
-   esClient, err = esclient.NewClient(constants.ES_PORT)
-   if err != nil {
-      logger.Fatal("Failed to initialize Elasticsearch client", map[string]any{
-         "error": err,
-      })
-   }
-
-   esIndex := esindex.New(esClient)
+   esService = setup.SetUpESSerive()
+   esIndex := esService.Index
 
    // Create the index
    mapping := `{
@@ -47,7 +37,7 @@ func TestMain(m *testing.M) {
       }
    }`
 
-   err = esIndex.CreateIndex(TEST_INDEX, []byte(mapping))
+   err := esIndex.CreateIndex(TEST_INDEX, []byte(mapping))
    if err != nil {
       logger.Fatal("Failed to create index", map[string]any{
          "error": err,

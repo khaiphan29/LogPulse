@@ -3,17 +3,16 @@ package es_test
 import (
    "fmt"
    "time"
+   "encoding/json"
    "testing"
    "github.com/stretchr/testify/assert"
 
-   "github.com/khaiphan29/logpulse/internal/es/agg"
-   "github.com/khaiphan29/logpulse/internal/es/doc"
    "github.com/khaiphan29/logpulse/pkg/logger"
 
 )
 
-func setup() {
-   esDoc := esdoc.New(esClient)
+func setupTotalLogCount() {
+   esDoc := esService.Doc
 
    // Create records
    for i := 1; i <= 10; i++ {
@@ -27,7 +26,13 @@ func setup() {
          "environment": "test",
          "type":        "application_log",
       }
-      err := esDoc.CreateDocument(TEST_INDEX, document)
+      jsonData, err := json.Marshal(document)
+      if err != nil {
+         logger.Fatal("Failed to marshal document", map[string]any{
+            "error": err,
+         })
+      }
+      err = esDoc.CreateDocument(TEST_INDEX, jsonData)
       if err != nil {
          logger.Fatal("Failed to create document", map[string]any{
             "error": err,
@@ -37,11 +42,11 @@ func setup() {
 }
 
 func TestCountTotalLogsByLevel(t *testing.T) {
-   setup()
+   setupTotalLogCount()
    lte := time.Now()
    gte := lte.Add(-24 * time.Hour)
 
-   esAgg := esagg.New(esClient)
+   esAgg := esService.Agg
    count, err := esAgg.CountTotalLogsByLevel(TEST_INDEX, "INFO", gte, lte)
    assert.Equal(t, nil, err, "CountTotalLogsByLevel should not return an error")
    assert.Equal(t, 10, count, "There should be 10 logs with level INFO")

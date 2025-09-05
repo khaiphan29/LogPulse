@@ -2,13 +2,13 @@ package es_test
 
 import (
 	"testing"
+   "encoding/json"
 
-	"github.com/khaiphan29/logpulse/internal/es/doc"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateDocument(t *testing.T) {
-   esdocService := esdoc.New(esClient)
+   esdocService := esService.Doc
 	if esdocService == nil {
 		t.Fatal("Elasticsearch client is not initialized")
 	}
@@ -23,13 +23,17 @@ func TestCreateDocument(t *testing.T) {
 		"environment": "test",
 		"type":        "application_log",
 	}
+   jsonData, err := json.Marshal(document)
+   if err != nil {
+      t.Fatal("Failed to marshal document:", err)
+   }
 
-	err := esdocService.CreateDocument(TEST_INDEX, document)
+	err = esdocService.CreateDocument(TEST_INDEX, jsonData)
 	assert.Equal(t, nil, err, "Sending document to index should not return an error")
 }
 
 func DeleteDocumentByQuery(t *testing.T) {
-   esdocService := esdoc.New(esClient)
+   esdocService := esService.Doc
 	if esdocService == nil {
 		t.Fatal("Elasticsearch client is not initialized")
 	}
