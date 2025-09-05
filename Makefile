@@ -12,6 +12,7 @@ ES_PORT ?= 9200
 
 # Ensure that clean, build, and run are treated as commands to execute, not as files or directories
 .PHONY: dev run utest test setup-kafka-brokers setup-kafka-topics help
+.ONESHELL:
 
 # Local Kafka setup - Deprecated
 # setup-kafka-brokers:
@@ -34,16 +35,18 @@ start-containers:
 
 # Example: make provision KAFKA_PORT=9092
 provision:
+	make start-containers
+	sleep 5 # wait for services to be fully up
 	@echo "Setting up Elasticsearch indexes..."
-	go run ./cmd/create_es_indexes/main.go $(ES_PORT)
+	@set -a; . .env; set +a; go run ./cmd/create_es_indexes/main.go $(ES_PORT)
 	@echo "Creating Kafka topics..."
-	go run ./cmd/create_kafka_topics/main.go $(KAFKA_PORT)
+	@set -a; . .env; set +a; go run ./cmd/create_kafka_topics/main.go $(KAFKA_PORT)
 
 dev:
-	make start-containers; \
-	@export APP_ENV=dev; \
-	echo "Starting Go Server with Air..."; \
-	@$(AIR_CMD)
+	make start-containers
+	sleep 10 # wait for services to be fully up
+	@echo "Starting Go Server with Air..."
+	@set -a; . .env; set +a; APP_ENV=dev $(AIR_CMD) # temporarily export all env vars from .env
 
 run:
 	export APP_ENV=dev
@@ -56,10 +59,13 @@ clean:
 	rm -rf $(TEMP_DIR)
 
 test:
-	@export APP_ENV=test; \
-	make start-containers; \
-	echo "Running tests..."; \
-	gotestsum --format testname -- -v ./...
+	export APP_ENV=test; \
+		make start-containers; \
+		sleep 5; \
+		echo "Running tests..."; \
+		set -a; . .env; set +a; \
+		gotestsum --format testname -- -v ./... \
+
 
 help:
 	@echo "Available commands:"
