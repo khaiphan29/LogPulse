@@ -1,57 +1,37 @@
-package mykafka
+package kafka
 
 import (
-   "errors"
-	"sync"
-
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 
    "github.com/khaiphan29/logpulse/pkg/logger"
+   "github.com/khaiphan29/logpulse/internal/config/kafka"
 )
 
-type KafkaProducer struct {
+type Producer struct {
    *kafka.Producer
 }
 
-// One Kafka producer for my app
-var (
-   kafkaProducer *KafkaProducer
-   mutex     sync.Mutex
-)
-
-// NewKafkaProducer initializes and returns a new Kafka producer
+// NewProducer initializes and returns a new Kafka producer
 // brokers exmaple: localhost:9092,localhost:9093
-func InitProducer(config *kafka.ConfigMap) (*KafkaProducer, error) {
-   mutex.Lock()
-   defer mutex.Unlock()
-
-   if kafkaProducer != nil {
-      err := errors.New("Kafka producer already exists")
-      return kafkaProducer, err
+func NewProducer(cfg *kafkaconfig.ProducerConfig) (*Producer, error) {
+   config := &kafka.ConfigMap{
+      "bootstrap.servers":        cfg.BootstrapServers,
    }
-
    producer, err := kafka.NewProducer(config)
-   if err == nil {
-      kafkaProducer = &KafkaProducer{producer}
-      startDeliveryReport()
+   if err != nil {
+      return nil, err
    }
 
-   return kafkaProducer, err
-}
-
-func GetProducer() (*KafkaProducer, error) {
-   var err error
-   if kafkaProducer == nil {
-      err = errors.New("Kafka producer not initialized")
-   }
-   return kafkaProducer, err
+   return &Producer{ producer }, nil
 }
 
 // SendMessage sends a message to the Kafka topic
-func (p *KafkaProducer) SendMessage(topic *string, key, value []byte) error {
+func (p *Producer) SendMessage(topic string, key, value []byte) error {
 	// Produce the message asynchronously
    err := p.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: topic},
+		TopicPartition: kafka.TopicPartition{
+         Topic: &topic,
+      },
 		// Currenly do not have key since we just use Kafka for broadcasting logs
 		Key:        key,
 		Value:      value,
@@ -60,11 +40,11 @@ func (p *KafkaProducer) SendMessage(topic *string, key, value []byte) error {
    return err
 }
 
-func startDeliveryReport() {
+func (p *Producer) StartDeliveryReport() {
    go func() {
       logger.Info("Starting Kafka Producer delivery report", nil)
       // Event() return a channel
-      for e := range kafkaProducer.Events() {
+      for e := range p.Events() {
          switch ev := e.(type) {
          case *kafka.Message:
             if ev.TopicPartition.Error != nil {
@@ -90,8 +70,8 @@ func startDeliveryReport() {
 }
 
 // Close closes the Kafka producer
-func (p *KafkaProducer) Shutdown() {
+func (p *Producer) Shutdown() {
 	// Wait for all messages to be delivered
-	kafkaProducer.Flush(15 * 1000)
-	kafkaProducer.Close()
+	p.Flush(15 * 1000)
+	p.Close()
 }
