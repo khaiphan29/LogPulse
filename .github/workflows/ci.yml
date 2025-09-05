@@ -36,7 +36,7 @@ jobs:
           docker compose up -d
 
       - name: Load env vars
-        run: cat .env.test >> $GITHUB_ENV
+        run: grep -v '^#' .env.test >> $GITHUB_ENV
 
       - name: Wait for services to be ready
         if: hashFiles('docker-compose.yml') != ''
