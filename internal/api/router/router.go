@@ -1,14 +1,19 @@
 package router
 
 import (
-   "github.com/gin-gonic/gin"
+	"net/http"
+	"os"
 
-   "github.com/khaiphan29/logpulse/internal/api/handlers"
+	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(mode string, logHandler *handlers.Handler) *gin.Engine {
+type Registrar interface {
+   RegisterRoutes(router *gin.Engine)
+}
+
+func New(r []Registrar) http.Handler {
    var engine *gin.Engine
-   switch mode {
+   switch os.Getenv("GIN_MODE") {
       case "test":
          // Set Gin to test mode
          gin.SetMode(gin.TestMode)
@@ -17,18 +22,14 @@ func NewRouter(mode string, logHandler *handlers.Handler) *gin.Engine {
          // Set Gin to release mode
          gin.SetMode(gin.ReleaseMode)
          engine = gin.Default()
-      }
+   }
 
-   setupRouter(engine, logHandler)
+   setupRouter(engine, r)
    return engine
 }
 
-func setupRouter(router *gin.Engine, logHandler *handlers.Handler) error {
-   // Define a simple GET endpoint
-   router.GET("/logs", logHandler.GETLog)
-
-   // Define a POST endpoint for log data
-   router.POST("/logs", logHandler.POSTLog)
-
-   return nil
+func setupRouter(router *gin.Engine, r []Registrar){
+   for _, registrar := range r {
+      registrar.RegisterRoutes(router)
+   }
 }

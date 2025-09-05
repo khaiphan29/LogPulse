@@ -7,7 +7,7 @@ import (
 
 type MockProducer struct{}
 
-func (m *MockProducer) SendMessage(topic *string, key, value []byte) error {
+func (m *MockProducer) SendMessage(topic string, key, value []byte) error {
    logger.Info("Mock SendMessage called", map[string]any{
       "topic": topic,
       "key":   string(key),
@@ -16,12 +16,8 @@ func (m *MockProducer) SendMessage(topic *string, key, value []byte) error {
    return nil
 }
 
-func (m *MockProducer) Shutdown() {
-   // Mock shutdown logic
-}
-
-func NewMockHandler() *handlers.Handler {
+func NewMockHandler() *handlers.LogHandler {
    mockProducer := &MockProducer{}
-   logHandler := handlers.NewHandler(mockProducer)
+   logHandler := handlers.NewLogHandler("mock-log-topic", mockProducer)
    return logHandler
 }

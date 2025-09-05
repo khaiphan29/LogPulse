@@ -1,6 +1,7 @@
 package router_test
 
 import (
+   "os"
 	"bytes"
 	"encoding/json"
 	"net/http"
@@ -8,21 +9,29 @@ import (
 	"testing"
 	"time"
 
-   "github.com/gin-gonic/gin"
-
    "github.com/khaiphan29/logpulse/internal/api/router"
 	"github.com/khaiphan29/logpulse/internal/api/parsing"
 	"github.com/stretchr/testify/assert"
 )
 
-var testRouter *gin.Engine
+var testRouter http.Handler
 
-func init() {
+func TestMain(m *testing.M) {
+   // Initialize the router before running tests
    // Set up Mock Handler
    logHandler := router.NewMockHandler()
 
    // Initialize the router
-   testRouter = router.NewRouter("test", logHandler)
+   os.Setenv("GIN_MODE", "test") // Ensure Gin is in test mode
+   handlers := []router.Registrar{
+      logHandler,
+   }
+   testRouter = router.New(handlers)
+
+   // Run the tests
+   code := m.Run()
+   // Exit with the appropriate code
+   os.Exit(code)
 }
 
 func TestGetLogHandler(t *testing.T) {
@@ -34,7 +43,6 @@ func TestGetLogHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{"message": "This is LOG"}`, w.Body.String())
 }
-
 
 func TestPostLogHandler(t *testing.T) {
 	// Iterate through test cases

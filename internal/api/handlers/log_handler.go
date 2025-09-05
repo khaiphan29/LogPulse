@@ -8,25 +8,25 @@ import (
 
    "github.com/khaiphan29/logpulse/internal/api/parsing"
    "github.com/khaiphan29/logpulse/pkg/logger"
-   "github.com/khaiphan29/logpulse/internal/constants"
 )
 
-type Producer interface {
-   SendMessage(topic *string, key, value []byte) error
-   Shutdown()
+type LogProducer interface {
+   SendMessage(topic string, key, value []byte) error
 }
 
-type Handler struct {
-   producer Producer
+type LogHandler struct {
+   producer LogProducer
+   logTopic string
 }
 
-func NewHandler(producer Producer) *Handler {
-   return &Handler{
+func NewLogHandler(logTopic string, producer LogProducer) *LogHandler {
+   return &LogHandler{
       producer: producer,
+      logTopic: logTopic,
    }
 }
 
-func (h *Handler) GETLog(c *gin.Context) {
+func (h *LogHandler) GETLog(c *gin.Context) {
    // Log the request
    logger.Info("Received GET request", nil)
 
@@ -34,7 +34,7 @@ func (h *Handler) GETLog(c *gin.Context) {
    c.JSON(200, gin.H{"message": "This is LOG"})
 }
 
-func (h *Handler) POSTLog(c *gin.Context) {
+func (h *LogHandler) POSTLog(c *gin.Context) {
    // Validate the incoming JSON payload
    var logData parser.LogPayload
    if err := validateLog(c, &logData); err != nil {
@@ -51,7 +51,6 @@ func (h *Handler) POSTLog(c *gin.Context) {
    c.JSON(http.StatusOK, gin.H{"message": "Log received"})
 
    // Send the log data to Kafka
-   topic := constants.KAFKA_TOPIC_LOGS
    key := []byte(logData.Source)
    value, err := json.Marshal(logData)
    if err != nil {
@@ -60,7 +59,7 @@ func (h *Handler) POSTLog(c *gin.Context) {
       })
       return
    }
-   h.producer.SendMessage(&topic, key, value)
+   h.producer.SendMessage(h.logTopic, key, value)
 }
 
 
@@ -90,4 +89,9 @@ func validateLog(c *gin.Context, logData *parser.LogPayload) error {
    }
 
    return nil
+}
+
+func (h *LogHandler) RegisterRoutes(router *gin.Engine) {
+   router.GET("/logs", h.GETLog)
+   router.POST("/logs", h.POSTLog)
 }
