@@ -19,17 +19,11 @@ func New(esClient *elasticsearch.Client) *Client {
 }
 
 // Send a document to the specified index in ElasticSearch
-func (client *Client) CreateDocument(index string, document any) error {
-	// Marshal the document into JSON
-	payloadJSON, err := json.Marshal(document)
-	if err != nil {
-      return err
-	}
-
+func (client *Client) CreateDocument(index string, document []byte) error {
 	// Send the document to the ElasticSearch index
 	res, err := client.Index(
 		index,
-		bytes.NewReader(payloadJSON),
+		bytes.NewReader(document),
 		client.Index.WithRefresh("true"), // Immediately make it available for search
 	)
 	if err != nil {
