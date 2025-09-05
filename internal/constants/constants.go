@@ -4,19 +4,10 @@ package constants
 const (
    LOG_LEVEL_ERROR = "ERROR"
 
-   //HTTP Server
-   HTTP_SERVER_PORT = ":8080"
+   KAFKA_LOGS_TOPIC_KEY = "logs"
+   KAFKA_LOG_RETRY_TOPIC_KEY = "logs_dlq"
+   KAFKA_TOPICS_CONFIG_PATH = "./internal/config/kafka/kafka_topics.yaml"
 
-   //Kafka Topic
-   KAFKA_BROKER_URL = "localhost:9094"
-   KAFKA_TOPIC_LOGS = "logs"
-   KAFKA_TOPIC_LOGS_DLQ = "logs-dlq"
-   KAFKA_TOPIC_LOGS_DLQ_PERMANENT = "logs-dlq-permanent"
-
-   //ES
-   ES_INDEX_LOG = "logs"
-   ES_PORT = "9200"
-
-   // Redis
-   REDIS_PORT = "6379"
+   ES1_PREFIX = "ES"
+   ES_LOGS_INDEX_CFG_PATH = "./internal/config/es/log_mapping.json"
 )
