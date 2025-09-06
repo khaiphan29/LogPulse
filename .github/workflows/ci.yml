@@ -44,6 +44,9 @@ jobs:
           echo "Waiting for services to be ready..."
           sleep 10  # Adjust the sleep time as necessary
 
+      - name: Build project
+        run: go build ./...
+
       - name: Run tests
         run: |
           go test ./...
