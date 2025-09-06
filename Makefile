@@ -44,15 +44,15 @@ provision:
 
 dev:
 	make start-containers
-	sleep 10 # wait for services to be fully up
+	sleep 5 # wait for services to be fully up
 	@echo "Starting Go Server with Air..."
 	@set -a; . .env; set +a; APP_ENV=dev $(AIR_CMD) # temporarily export all env vars from .env
 
 run:
-	export APP_ENV=dev
+	make start-containers
+	sleep 5 # wait for services to be fully up
 	@echo "Starting Go Server..."
-	go build -o ./tmp/app $(API_FILE)
-	./tmp/app $(API_PORT)
+	@set -a; . .env; set +a; APP_ENV=dev go run $(API_FILE)
 
 clean:
 	@echo "Cleaning up temporary files..."
@@ -66,6 +66,14 @@ test:
 		set -a; . .env; set +a; \
 		gotestsum --format testname -- -v ./... \
 
+p ?= ./...
+testfile:
+		export APP_ENV=test; \
+		make start-containers; \
+		sleep 5; \
+		echo "Running tests..."; \
+		set -a; . .env; set +a; \
+		gotestsum $(p) \
 
 help:
 	@echo "Available commands:"
