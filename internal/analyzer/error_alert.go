@@ -63,6 +63,11 @@ func (a *LogErrAnalyzer) AnalyzeError() {
          "error": err,
       })
       return
+   } else {
+      logger.Info("Err Log Count Query result:", map[string]any{
+         "count": results,
+         "time_window": a.TimeWindow,
+      })
    }
 
    if results >= a.Threshold {
