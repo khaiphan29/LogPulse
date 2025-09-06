@@ -9,7 +9,7 @@ import (
 	"github.com/khaiphan29/logpulse/pkg/logger"
 )
 
-func setUpKafkaProducer() (*kafka.Producer, func ()) {
+func SetupKafkaProducer() (*kafka.Producer, func ()) {
    // Kafka Producer
    producerCfg := kafkaconfig.LoadProducerConfig("KAFKA_PRODUCER_LOG")
    producer, err := kafka.NewProducer(producerCfg)
@@ -22,7 +22,7 @@ func setUpKafkaProducer() (*kafka.Producer, func ()) {
    return producer, producer.Shutdown
 }
 
-func setUpConsumerGroups(msgProcessor kafka.MessageProcessor) (*kafka.ConsumerGroup, func ()) {
+func SetupConsumerGroups(msgProcessor kafka.MessageProcessor) (*kafka.ConsumerGroup, func ()) {
    consumerGroupCfgs := kafkaconfig.LoadConsumerGroupConfig("KAFKA_CONSUMER_LOG")
    consumers, err := kafka.CreateConsumerGroup(consumerGroupCfgs, msgProcessor)
    if err != nil {

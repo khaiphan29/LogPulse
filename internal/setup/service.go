@@ -24,7 +24,7 @@ func InitService() func() {
    esServices := SetUpESSerive()
 
    // Initialize Kafka producer
-   producer, shutdownProducer := setUpKafkaProducer()
+   producer, shutdownProducer := SetupKafkaProducer()
 
    // Cache Instance
    redisClient := setupRedisClient()
@@ -36,7 +36,7 @@ func InitService() func() {
    logProcessor := processor.NewLogProcessor(esLogIndex.Name, kafkaTopics[constants.KAFKA_LOG_RETRY_TOPIC_KEY].Name, esServices.Doc, producer, logErrAnalyzer)
 
    // Initialize Kafka consumers
-   _, cancelConsumers := setUpConsumerGroups(logProcessor)
+   _, cancelConsumers := SetupConsumerGroups(logProcessor)
 
    // Initialize handlers
    logHandler := handlers.NewLogHandler(kafkaTopics[constants.KAFKA_LOGS_TOPIC_KEY].Name, producer)
@@ -49,17 +49,18 @@ func InitService() func() {
 
    // Start HTTP server
    s := &http.Server{
-      Addr: os.Getenv("SERVER_PORT"),
+      Addr: os.Getenv("SERVER_HOST") + ":" + os.Getenv("SERVER_PORT"),
       Handler: r,
    }
 
    go func() {
-      logger.Info("Server started on", map[string]any{
-         "Addr": s.Addr,
-      })
       if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-         logger.Fatal("Listen: %s\n", map[string]any{
+         logger.Fatal("HTTP start failed.", map[string]any{
             "error": err,
+         })
+      } else {
+         logger.Info("Server started on", map[string]any{
+            "Addr": s.Addr,
          })
       }
    }()
