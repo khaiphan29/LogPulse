@@ -7,7 +7,7 @@ import (
 
 type IndexConfig struct {
    Name string `json:"name"`
-   Mapping string `json:"mapping"`
+   Mapping json.RawMessage `json:"configs"`
 }
 
 type ClientConfig struct {
