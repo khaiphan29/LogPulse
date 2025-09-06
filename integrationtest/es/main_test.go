@@ -1,11 +1,12 @@
 package es_test
 
 import (
-   "os"
-   "testing"
+	"os"
+	"testing"
 
-   "github.com/khaiphan29/logpulse/internal/setup"
-   "github.com/khaiphan29/logpulse/pkg/logger"
+	"github.com/khaiphan29/logpulse/internal/config/es"
+	"github.com/khaiphan29/logpulse/internal/setup"
+	"github.com/khaiphan29/logpulse/pkg/logger"
 )
 
 const (
@@ -21,21 +22,8 @@ func TestMain(m *testing.M) {
    esService = setup.SetUpESSerive()
    esIndex := esService.Index
 
-   // Create the index
-   mapping := `{
-      "mappings": {
-         "properties": {
-            "logId": { "type": "keyword" },
-            "timestamp": { "type": "date" },
-            "logLevel": { "type": "keyword" },
-            "message": { "type": "text", "analyzer": "standard" },
-            "metadata": { "type": "object" },
-            "source": { "type": "keyword" },
-            "environment": { "type": "keyword" },
-            "type": { "type": "keyword" }
-         }
-      }
-   }`
+   indexConfig := esconfig.LoadIndexConfig("test_log_mapping.json")
+   mapping := indexConfig.Mapping
 
    err := esIndex.CreateIndex(TEST_INDEX, []byte(mapping))
    if err != nil {
