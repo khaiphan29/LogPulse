@@ -10,10 +10,10 @@ import (
 )
 
 func setupLogErrorAnalyzer(agg analyzer.LogErrAggregator, cacheClient analyzer.CacheClient, indexName string) *analyzer.LogErrAnalyzer {
-   cacheKey := os.Getenv("CACHE_TOTAL_LOG_COUNT_KEY")
-   cacheTTL, err := time.ParseDuration(os.Getenv("CACHE_TOTAL_LOG_COUNT_TTL"))
+   cacheKey := os.Getenv("CACHE_LOG_COUNT_KEY")
+   cacheTTL, err := time.ParseDuration(os.Getenv("CACHE_LOG_COUNT_TTL"))
    if err != nil {
-      logger.Fatal("Failed to parse CACHE_TOTAL_LOG_COUNT_TTL", map[string]any{
+      logger.Fatal("Failed to parse cache CACHE_LOG_COUNT_TTL", map[string]any{
          "error": err,
       })
    }
