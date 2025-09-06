@@ -48,7 +48,9 @@ func (client *Client) CountTotalLogsByLevel(index, level string, timegte, timelt
       return 0, err
    }
 
-   logger.Info("Counting total logs by level", map[string]any{
+   logger.Info("Counting total logs by level query", map[string]any{
+      "index": index,
+      "level": level,
       "options": opts,
    })
 

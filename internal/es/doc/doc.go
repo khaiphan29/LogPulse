@@ -1,11 +1,12 @@
 package esdoc
 
 import (
-   "bytes"
-   "encoding/json"
-   "fmt"
+	"bytes"
+	"encoding/json"
+	"fmt"
 
-   "github.com/elastic/go-elasticsearch/v9"
+	"github.com/elastic/go-elasticsearch/v9"
+	"github.com/khaiphan29/logpulse/pkg/logger"
 )
 
 type Client struct {
@@ -28,7 +29,13 @@ func (client *Client) CreateDocument(index string, document []byte) error {
 	)
 	if err != nil {
       return err
-	}
+	} else {
+      logger.Debug("Document indexed successfully", map[string]any{
+         "index": index,
+         "response": res,
+         "document": string(document),
+      })
+   }
 	defer res.Body.Close()
 
 	// Check for response errors

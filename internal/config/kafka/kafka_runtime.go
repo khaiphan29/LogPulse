@@ -26,8 +26,8 @@ type ProducerConfig struct {
 
 func LoadConsumerGroupConfig(prefix string) *ConsumerGroupConfig {
    numberOfConsumers := utils.LoadIntEnv(prefix + "_NUM_OF_CONSUMERS")
-   autoCommit := utils.LoadBoolEnv(prefix + "_ENABLE_AUTO_COMMIT")
-   autoOffsetStore := utils.LoadBoolEnv(prefix + "_ENABLE_AUTO_OFFSET_STORE")
+   autoCommit := utils.LoadBoolEnv(prefix + "_AUTO_COMMIT")
+   autoOffsetStore := utils.LoadBoolEnv(prefix + "_AUTO_OFFSET_STORE")
 
    return &ConsumerGroupConfig{
       NumOfConsumers: numberOfConsumers,
