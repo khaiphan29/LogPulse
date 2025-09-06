@@ -41,6 +41,10 @@ func NewConsumer(cfg kafkaconfig.ConsumerConfig, processor MessageProcessor) (*C
    // Subscribe to the specified topics
    if err := c.SubscribeTopics(cfg.Topics, nil); err != nil {
       return nil, fmt.Errorf("failed to subscribe to topics: %w", err)
+   } else {
+      logger.Info("Consumer subscribed to topics", map[string]any{
+         "topics": cfg.Topics,
+      })
    }
 
    return &Consumer {
@@ -58,7 +62,9 @@ func (c *Consumer) ListenForMessages(timeoutMs time.Duration, ctx context.Contex
          return
       default:
          topics, _ := c.Subscription()
-         fmt.Printf("Consumer: %s on topic: %v is waiting for message\n", c, topics)
+         logger.Info("Polling for messages", map[string]any{
+            "topics": topics,
+         })
          msg, err := c.ReadMessage(timeoutMs)
          if err != nil {
             logger.Error("Failed to read message", map[string]any{
@@ -67,14 +73,31 @@ func (c *Consumer) ListenForMessages(timeoutMs time.Duration, ctx context.Contex
             continue
          }
 
-         fmt.Printf("Consumer: %s on topic: %v start processing msg...\n", c, topics)
+         logger.Info("Consumer: Received message", map[string]any{
+            "topic":     *msg.TopicPartition.Topic,
+            "partition": msg.TopicPartition.Partition,
+            "offset":    msg.TopicPartition.Offset,
+            "key":       string(msg.Key),
+            "value":     string(msg.Value),
+         })
          // Process the message
          if err := c.messageProcessor.Process(msg.Value); err != nil {
             logger.Error("Failed to process message", map[string]any{
                "error": err,
             })
          } else {
-            c.Commit()
+            TopicPartition, err := c.Commit()
+            if err != nil {
+               logger.Error("Failed to commit offset", map[string]any{
+                  "error": err,
+               })
+            } else {
+               logger.Info("Offset committed", map[string]any{
+                  "topic":     *TopicPartition[0].Topic,
+                  "partition": TopicPartition[0].Partition,
+                  "offset":    TopicPartition[0].Offset,
+               })
+            }
          }
       }
    }
