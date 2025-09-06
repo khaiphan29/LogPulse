@@ -51,10 +51,10 @@ func (lp *LogProcessor) Process(msg []byte) error {
       if sendErr := lp.Retry.SendMessage(lp.RetryTopic, key, msg); sendErr != nil {
          return fmt.Errorf("failed to store log: %v, also failed to send to retry: %v", err, sendErr)
       }
-   }
-
-   if log.LogLevel == constants.LOG_LEVEL_ERROR {
-      lp.Analyzer.AnalyzeError()
+   } else {
+      if log.LogLevel == constants.LOG_LEVEL_ERROR {
+         lp.Analyzer.AnalyzeError()
+      }
    }
 
    return nil
