@@ -39,7 +39,7 @@ func getLogLevel(env string) logrus.Level {
    case "dev":
       return logrus.DebugLevel
    case "test":
-      return logrus.InfoLevel
+      return logrus.DebugLevel
    default:
       logrus.Warn("Unrecognized APP_ENV, defaulting to DebugLevel")
       return logrus.DebugLevel
