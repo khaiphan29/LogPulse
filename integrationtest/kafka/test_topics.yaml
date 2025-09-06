@@ -1,0 +1,6 @@
+topics:
+  test_logs:
+    name: test_logs
+    partitions: 3
+    compression_type: lz4
+    retention_ms: 604800000   # 7 days
