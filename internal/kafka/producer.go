@@ -53,7 +53,7 @@ func (p *Producer) StartDeliveryReport() {
                   "error": ev.TopicPartition.Error,
                })
             } else {
-               logger.Info("PRODUCER: Message delivered", map[string]any{
+               logger.Info("Producer Delivery Report: Message delivered", map[string]any{
                   "topic": *ev.TopicPartition.Topic,
                   "partition": ev.TopicPartition.Partition,
                   "key":   string(ev.Key),
@@ -61,7 +61,7 @@ func (p *Producer) StartDeliveryReport() {
                })
             }
          case *kafka.Error:
-            logger.Error("Kafka error", map[string]any{
+            logger.Error("Producer Delivery Error", map[string]any{
                "error": ev,
             })
          }
